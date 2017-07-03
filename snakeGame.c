@@ -62,8 +62,6 @@ void geraCampo(char campo[TAM_CAMPO][TAM_CAMPO]){
 	campo[1] [4] = '@';
 	
 	campo[TAM_CAMPO-2] [TAM_CAMPO-2] = 'O';
-	
-	campo[0] [0] = '╔';
 }
 
 void adicionaComida(char campo[TAM_CAMPO][TAM_CAMPO]){
