@@ -118,91 +118,67 @@ void moveCauda(char campo[TAM_CAMPO][TAM_CAMPO]){
 	}
 }
 
-void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], int *score){
-	int x, y;
-	int pontuou=0;
+void obtemPosicao(int *x, int *y, char campo[TAM_CAMPO] [TAM_CAMPO]){
 
-	for(y=1; y < TAM_CAMPO-1; ++y){
-		for(x=1; x<TAM_CAMPO-1; ++x){
+	for(*y=1; *y < TAM_CAMPO-1; ++(*y)){
+		for(*x=1; *x < TAM_CAMPO-1; ++(*x)){
 		
-			if(campo[y][x] == '@'){
-				campo[y][x] = 'o';
-			
-				if(*direcao == DIREITA){
-					if(x+2 == TAM_CAMPO){
-						if(campo[y][1] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-					
-						campo[y][1] = '@';
-					} else {
-						if(campo[y][x+1] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[y][x+1] = '@';
-					}
-				} else if(*direcao == ESQUERDA){
-					if(x-1 == 0){
-						if(campo[y] [TAM_CAMPO-2] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[y] [TAM_CAMPO-2] = '@';
-					} else {
-						if(campo[y][x-1] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[y][x-1] = '@';
-					}
-				} else if(*direcao == BAIXO){
-					if(y+2 == TAM_CAMPO){
-						if(campo[1][x] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[1][x] = '@';
-					} else {
-						if(campo[y+1][x] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[y+1][x] = '@';
-					}
-				} else if(*direcao == CIMA){
-					if(y-1 == 0){
-						if(campo[TAM_CAMPO-2] [x] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[TAM_CAMPO-2] [x] = '@';
-					} else {
-						if(campo[y-1] [x] == 'O'){
-							++(*score);
-							pontuou=1;
-						}
-						
-						campo[y-1] [x] = '@';
-					}
-				}
-				
-				if(pontuou){
-					adicionaComida(campo);
-				} else {
-					moveCauda(campo);
-				}
-			
+			if(campo[*y][*x] == '@'){
 				return;
 			}
 		}
+	}
+}
+
+void obtemNovaPosicao(int x, int y, char *direcao, int *newX, int *newY){
+	*newX = x;
+	*newY = y;
+	
+	if(*direcao == DIREITA){
+		++(*newX);
+	} else if(*direcao == ESQUERDA){
+		--(*newX);
+	} else if(*direcao == BAIXO){
+		++(*newY);
+	} else if(*direcao == CIMA){
+		--(*newY);
+	}
+	
+	if((*newX)+1 == TAM_CAMPO){
+		*newX = 1;
+	} else if((*newY)+1 == TAM_CAMPO){
+		*newY = 1;
+	} else if(*newX == 0){
+		*newX = TAM_CAMPO -2;
+	} else if(*newY == 0){
+		*newY = TAM_CAMPO -2;
+	}
+}
+
+void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], int *score){
+	int x, y, newX, newY;
+	int pontuou=0;
+	
+	obtemPosicao(&x, &y, campo);
+	
+	obtemNovaPosicao(x, y, direcao, &newX, &newY);
+	
+	if(campo[newY][newX] == 'O'){
+		pontuou=1;
+	}
+	
+	campo[y][x] = 'o';
+	
+	x = newX;
+	y = newY;
+	
+	campo[y][x] = '@';
+	
+	if(pontuou){
+		++(*score);
+		adicionaComida(campo);
+	} else {
+		moveCauda(campo);
 	}
 }
 
