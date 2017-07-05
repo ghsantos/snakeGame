@@ -16,10 +16,17 @@
 #include <time.h>
 
 #define TAM_CAMPO 16
+#define TAM_MAX_COBRA (TAM_CAMPO-1) * (TAM_CAMPO-1)
+
 #define DIREITA 'D'
 #define ESQUERDA 'A'
 #define CIMA 'W'
 #define BAIXO 'S'
+
+typedef struct Ponto {
+	int x;
+	int y;
+} Ponto;
 
 
 int getch_echo(int echo){
@@ -55,13 +62,6 @@ void geraCampo(char campo[TAM_CAMPO][TAM_CAMPO]){
 			}
 		}
 	}
-	
-	campo[1] [1] = 'o';
-	campo[1] [2] = 'o';
-	campo[1] [3] = 'o';
-	campo[1] [4] = '@';
-	
-	campo[TAM_CAMPO-2] [TAM_CAMPO-2] = 'O';
 }
 
 void adicionaComida(char campo[TAM_CAMPO][TAM_CAMPO]){
@@ -182,9 +182,50 @@ void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], int *score)
 	}
 }
 
-void loopJogo(char *direcao, char campo[TAM_CAMPO][TAM_CAMPO]){
+void geraCobra(Ponto cobra[TAM_MAX_COBRA]){
+	int posX, posY, i;
+	
+	srand((unsigned)time(NULL));
+	
+	posX = rand()%(TAM_CAMPO-7) + 4;
+	usleep(100);
+	posY = rand()%(TAM_CAMPO-7) + 4;
+	
+	cobra[0].x = posX;
+	cobra[0].y = posY;
+	
+	for(i=0; i < 4; ++i){
+		cobra[i].x = posX;
+		cobra[i].y = posY-i;
+	}
+}
+
+void adicionaCobra(Ponto cobra[TAM_MAX_COBRA], int tamCobra, char campo[TAM_CAMPO] [TAM_CAMPO]){
+	int i;
+	
+	campo[cobra[0].x] [cobra[0].y] = '@';
+	
+	for(i=1; i<tamCobra; ++i){
+		campo[cobra[i].x] [cobra[i].y] = 'o';
+	}
+}
+
+void loopJogo(char *direcao){
 	int x, y;
 	int score=0;
+	
+	char campo[TAM_CAMPO] [TAM_CAMPO];
+	
+	int tamCobra = 4;
+	Ponto cobra[TAM_MAX_COBRA];
+	
+	geraCampo(campo);
+	
+	geraCobra(cobra);
+	
+	adicionaCobra(cobra, tamCobra, campo);
+	
+	adicionaComida(campo);
 	
 	while(1){
 		atualizaCampo(direcao, campo, &score);
@@ -222,14 +263,10 @@ void *leituraTeclado(void *ptr){
 }
 
 int main(){
-	char campo[TAM_CAMPO] [TAM_CAMPO];
 	char direcao = DIREITA;
 	
 	pthread_t threadLeitura;
 	int retPthread_create;
-	
-	
-	geraCampo(campo);
 	
 	
 	retPthread_create = pthread_create(&threadLeitura, NULL, leituraTeclado, (void*) &direcao);
@@ -240,7 +277,7 @@ int main(){
 	}
 
 
-	loopJogo(&direcao, campo);
+	loopJogo(&direcao);
 	
 	pthread_join(threadLeitura, NULL);
 
