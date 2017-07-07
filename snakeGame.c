@@ -16,7 +16,7 @@
 #include <time.h>
 
 #define TAM_CAMPO 16
-#define TAM_MAX_COBRA (TAM_CAMPO-1) * (TAM_CAMPO-1)
+#define TAM_MAX_COBRA (TAM_CAMPO) * (TAM_CAMPO)
 
 #define DIREITA 'D'
 #define ESQUERDA 'A'
@@ -80,56 +80,6 @@ void adicionaComida(char campo[TAM_CAMPO][TAM_CAMPO]){
 	}while(campo[posY][posX] != 'O');
 }
 
-void moveCauda(char campo[TAM_CAMPO][TAM_CAMPO]){
-	int x, y;
-	int somaLaterais;
-
-	for(y=1; y < TAM_CAMPO-1; ++y){
-		for(x=1; x<TAM_CAMPO-1; ++x){
-		
-			if(campo[y][x] == 'o'){
-			
-				somaLaterais=0;
-			
-				if(campo[y+1][x] == 'o' || campo[y+1][x] == '@'){
-					++somaLaterais;
-				}
-				
-				if(campo[y][x+1] == 'o' || campo[y][x+1] == '@'){
-					++somaLaterais;
-				}
-				
-				if(campo[y-1][x] == 'o' || campo[y-1][x] == '@'){
-					++somaLaterais;
-				}
-				
-				if(campo[y][x-1] == 'o' || campo[y][x-1] == '@'){
-					++somaLaterais;
-				}
-				
-				if(somaLaterais == 1){
-					campo[y][x] = ' ';
-					
-					return;
-				}
-			
-			}
-		}
-	}
-}
-
-void obtemPosicao(int *x, int *y, char campo[TAM_CAMPO] [TAM_CAMPO]){
-
-	for(*y=1; *y < TAM_CAMPO-1; ++(*y)){
-		for(*x=1; *x < TAM_CAMPO-1; ++(*x)){
-		
-			if(campo[*y][*x] == '@'){
-				return;
-			}
-		}
-	}
-}
-
 void obtemNovaPosicao(int x, int y, char *direcao, int *newX, int *newY){
 	*newX = x;
 	*newY = y;
@@ -155,30 +105,42 @@ void obtemNovaPosicao(int x, int y, char *direcao, int *newX, int *newY){
 	}
 }
 
-void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], int *score){
-	int x, y, newX, newY;
+void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA], int *tamCobra, int *score){
+	int newX, newY;
 	int pontuou=0;
+	int i;
+	Ponto aux1, aux2;
 	
-	obtemPosicao(&x, &y, campo);
-	
-	obtemNovaPosicao(x, y, direcao, &newX, &newY);
+	obtemNovaPosicao(cobra[0].x, cobra[0].y, direcao, &newX, &newY);
 	
 	if(campo[newY][newX] == 'O'){
 		pontuou=1;
 	}
 	
-	campo[y][x] = 'o';
+	campo[cobra[0].y][cobra[0].x] = 'o';
 	
-	x = newX;
-	y = newY;
 	
-	campo[y][x] = '@';
+	aux2 = cobra[0];
+	
+	for(i=1; i<(*tamCobra); ++i){
+		aux1 = cobra[i];
+		
+		cobra[i] = aux2;
+		
+		aux2 = aux1;
+	}
+	
+	cobra[0].x = newX;
+	cobra[0].y = newY;
+	
+	campo[cobra[0].y][cobra[0].x] = '@';
 	
 	if(pontuou){
 		++(*score);
+		++(*tamCobra);
 		adicionaComida(campo);
 	} else {
-		moveCauda(campo);
+		campo[cobra[(*tamCobra)-1].y][cobra[(*tamCobra)-1].x] = ' ';
 	}
 }
 
@@ -195,18 +157,18 @@ void geraCobra(Ponto cobra[TAM_MAX_COBRA]){
 	cobra[0].y = posY;
 	
 	for(i=0; i < 4; ++i){
-		cobra[i].x = posX;
-		cobra[i].y = posY-i;
+		cobra[i].x = posX-i;
+		cobra[i].y = posY;
 	}
 }
 
 void adicionaCobra(Ponto cobra[TAM_MAX_COBRA], int tamCobra, char campo[TAM_CAMPO] [TAM_CAMPO]){
 	int i;
 	
-	campo[cobra[0].x] [cobra[0].y] = '@';
+	campo [cobra[0].y][cobra[0].x] = '@';
 	
-	for(i=1; i<tamCobra; ++i){
-		campo[cobra[i].x] [cobra[i].y] = 'o';
+	for(i=1; i<tamCobra-1; ++i){
+		campo [cobra[i].y][cobra[i].x] = 'o';
 	}
 }
 
@@ -228,7 +190,7 @@ void loopJogo(char *direcao){
 	adicionaComida(campo);
 	
 	while(1){
-		atualizaCampo(direcao, campo, &score);
+		atualizaCampo(direcao, campo, cobra, &tamCobra, &score);
 	
 		printf("\e[H\e[2J");
 		
