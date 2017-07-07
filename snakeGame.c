@@ -224,6 +224,23 @@ void *leituraTeclado(void *ptr){
 	}
 }
 
+void inicio(){
+
+	printf("\e[H\e[2J");
+	
+	printf("\n\n\n\n");
+	
+	printf("     .oooooo..o                       oooo                  \n");
+	printf("    d8P'    `Y8                       `888                  \n");
+	printf("    Y88bo.      ooo. .oo.    .oooo.    888  oooo   .ooooo.  \n");
+	printf("     `\"Y8888o.  `888P\"Y88b  `P  )88b   888 .8P'   d88' `88b \n");
+	printf("         `\"Y88b  888   888   .oP\"888   888888.    888ooo888 \n");
+	printf("    oo     .d8P  888   888  d8(  888   888 `88b.  888    .o \n");
+	printf("    8\"\"88888P'  o888o o888o `Y888\"\"8o o888o o888o `Y8bod8P'\n");
+
+	sleep(2);
+}
+
 int main(){
 	char direcao = DIREITA;
 	
@@ -238,6 +255,7 @@ int main(){
 		exit(1);
 	}
 
+	inicio();
 
 	loopJogo(&direcao);
 	
