@@ -209,17 +209,23 @@ void loopJogo(char *direcao){
 }
 
 void *leituraTeclado(void *ptr){
-	char aux, *direcao;
+	char aux, *direcao, direcaoAnterior;
 	
 	direcao = (char *) ptr;
+	
+	direcaoAnterior = *direcao;
 	
 	while(1){
 		aux = getch_echo(0);
 		
 		aux = toupper(aux);
 	
-		if(aux == DIREITA || aux == ESQUERDA || aux == CIMA || aux == BAIXO){
+		if((aux == DIREITA && aux != *direcao && direcaoAnterior != ESQUERDA) ||
+		   (aux == ESQUERDA && aux != *direcao && direcaoAnterior != DIREITA) ||
+		   (aux == CIMA && aux != *direcao && direcaoAnterior != BAIXO) ||
+		   (aux == BAIXO && aux != *direcao && direcaoAnterior != CIMA)){
 			*direcao = aux;
+			direcaoAnterior = *direcao;
 		}
 	}
 }
