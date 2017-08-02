@@ -49,6 +49,29 @@ int getch_echo(int echo){
 }
 
 
+void *leituraTeclado(void *ptr){
+	char aux, *direcao, direcaoAnterior;
+	
+	direcao = (char *) ptr;
+	
+	direcaoAnterior = *direcao;
+	
+	while(1){
+		aux = getch_echo(0);
+		
+		aux = toupper(aux);
+	
+		if((aux == DIREITA && aux != *direcao && direcaoAnterior != ESQUERDA) ||
+		   (aux == ESQUERDA && aux != *direcao && direcaoAnterior != DIREITA) ||
+		   (aux == CIMA && aux != *direcao && direcaoAnterior != BAIXO) ||
+		   (aux == BAIXO && aux != *direcao && direcaoAnterior != CIMA)){
+			*direcao = aux;
+			direcaoAnterior = *direcao;
+		}
+	}
+}
+
+
 void geraCampo(char campo[TAM_CAMPO][TAM_CAMPO]){
 
 	int x, y;
@@ -105,20 +128,16 @@ void obtemNovaPosicao(int x, int y, char *direcao, int *newX, int *newY){
 	}
 }
 
-void atualizaCampo(char *direcao, char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA], int *tamCobra, int *score){
-	int newX, newY;
+void atualizaCampo(char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA], int *tamCobra, int *score, int newX, int newY){
 	int pontuou=0;
 	int i;
 	Ponto aux1, aux2;
-	
-	obtemNovaPosicao(cobra[0].x, cobra[0].y, direcao, &newX, &newY);
 	
 	if(campo[newY][newX] == 'O'){
 		pontuou=1;
 	}
 	
 	campo[cobra[0].y][cobra[0].x] = 'o';
-	
 	
 	aux2 = cobra[0];
 	
@@ -172,13 +191,26 @@ void adicionaCobra(Ponto cobra[TAM_MAX_COBRA], int tamCobra, char campo[TAM_CAMP
 	}
 }
 
-void loopJogo(char *direcao){
+void loopJogo(){
 	int x, y;
 	int score=0;
-	
+	int newX, newY;
+	char direcao = DIREITA;;
 	char campo[TAM_CAMPO] [TAM_CAMPO];
 	
 	int tamCobra = 4;
+	
+	pthread_t threadLeitura;
+	int retPthread_create;
+	
+	
+	retPthread_create = pthread_create(&threadLeitura, NULL, leituraTeclado, (void*) &direcao);
+	
+	if(retPthread_create){
+		printf("Erro em pthred_create() retornando %d\n", retPthread_create);
+		exit(1);
+	}
+	
 	Ponto cobra[TAM_MAX_COBRA];
 	
 	geraCampo(campo);
@@ -190,7 +222,17 @@ void loopJogo(char *direcao){
 	adicionaComida(campo);
 	
 	while(1){
-		atualizaCampo(direcao, campo, cobra, &tamCobra, &score);
+		obtemNovaPosicao(cobra[0].x, cobra[0].y, direcao, &newX, &newY);
+	
+		if(campo[newY][newX] == 'o'){
+			pthread_cancel(threadLeitura);
+			
+			pthread_join(threadLeitura, NULL);
+			
+			break;
+		}
+	
+		atualizaCampo(campo, cobra, &tamCobra, &score, newX, newY);
 	
 		printf("\e[H\e[2J");
 		
@@ -208,27 +250,6 @@ void loopJogo(char *direcao){
 	}
 }
 
-void *leituraTeclado(void *ptr){
-	char aux, *direcao, direcaoAnterior;
-	
-	direcao = (char *) ptr;
-	
-	direcaoAnterior = *direcao;
-	
-	while(1){
-		aux = getch_echo(0);
-		
-		aux = toupper(aux);
-	
-		if((aux == DIREITA && aux != *direcao && direcaoAnterior != ESQUERDA) ||
-		   (aux == ESQUERDA && aux != *direcao && direcaoAnterior != DIREITA) ||
-		   (aux == CIMA && aux != *direcao && direcaoAnterior != BAIXO) ||
-		   (aux == BAIXO && aux != *direcao && direcaoAnterior != CIMA)){
-			*direcao = aux;
-			direcaoAnterior = *direcao;
-		}
-	}
-}
 
 void inicio(){
 
@@ -248,24 +269,12 @@ void inicio(){
 }
 
 int main(){
-	char direcao = DIREITA;
-	
-	pthread_t threadLeitura;
-	int retPthread_create;
-	
-	
-	retPthread_create = pthread_create(&threadLeitura, NULL, leituraTeclado, (void*) &direcao);
-	
-	if(retPthread_create){
-		printf("Erro em pthred_create() retornando %d\n", retPthread_create);
-		exit(1);
-	}
 
 	inicio();
 
-	loopJogo(&direcao);
+	loopJogo();
 	
-	pthread_join(threadLeitura, NULL);
+	printf("sasa");
 
 	return 0;
 }
