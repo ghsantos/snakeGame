@@ -191,8 +191,39 @@ void adicionaCobra(Ponto cobra[TAM_MAX_COBRA], int tamCobra, char campo[TAM_CAMP
 	}
 }
 
-void loopJogo(){
+
+void exibeCampo(char campo[TAM_CAMPO] [TAM_CAMPO], int score){
 	int x, y;
+
+	printf("\e[H\e[2J");
+		
+	printf("Score: %d\n\n", score);
+
+	for(x=0; x < TAM_CAMPO; ++x){
+		for(y=0; y<TAM_CAMPO; ++y){
+			printf("%c ", campo[x][y]);
+		}
+		printf("\n");
+	}
+}
+
+
+void terminaJogo(char campo[TAM_CAMPO] [TAM_CAMPO], int score){
+	int x, y;
+	
+	for(x=0; x < TAM_CAMPO; ++x){
+		for(y=0; y<TAM_CAMPO; ++y){
+			campo[x][y] = '*';
+			
+			exibeCampo(campo, score);
+			
+			usleep(15000);
+		}
+	}
+}
+
+
+void loopJogo(){
 	int score=0;
 	int newX, newY;
 	char direcao = DIREITA;;
@@ -229,21 +260,14 @@ void loopJogo(){
 			
 			pthread_join(threadLeitura, NULL);
 			
+			terminaJogo(campo, score);
+			
 			break;
 		}
 	
 		atualizaCampo(campo, cobra, &tamCobra, &score, newX, newY);
 	
-		printf("\e[H\e[2J");
-		
-		printf("Score: %d\n\n", score);
-	
-		for(x=0; x < TAM_CAMPO; ++x){
-			for(y=0; y<TAM_CAMPO; ++y){
-				printf("%c ", campo[x][y]);
-			}
-			printf("\n");
-		}
+		exibeCampo(campo, score);
 	
 		// Espera 0.5 segundos para atualizar o campo de jogo
 		usleep(500000);
