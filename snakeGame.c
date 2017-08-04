@@ -269,12 +269,14 @@ void inicio(){
 }
 
 int main(){
+	struct termios oldt;
+
+	tcgetattr( STDIN_FILENO, &oldt );
 
 	inicio();
-
 	loopJogo();
-	
-	printf("sasa");
+
+	tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
 
 	return 0;
 }
