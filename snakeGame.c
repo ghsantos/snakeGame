@@ -222,7 +222,7 @@ void loopJogo(){
 	adicionaComida(campo);
 	
 	while(1){
-		obtemNovaPosicao(cobra[0].x, cobra[0].y, direcao, &newX, &newY);
+		obtemNovaPosicao(cobra[0].x, cobra[0].y, &direcao, &newX, &newY);
 	
 		if(campo[newY][newX] == 'o'){
 			pthread_cancel(threadLeitura);
