@@ -1,6 +1,6 @@
 /* @author: Gustavo Henrique de Oliveira Santos
  *
- * Implementacao do jogo Snake em C usando a Pthreds
+ * Implementacao do jogo Snake em C usando a Pthreads
  *
  * Para compilar em linha de comando:
  * gcc -pthread snakeGame.c
@@ -269,7 +269,7 @@ void loopJogo(int velocidade){
 	
 		exibeCampo(campo, score);
 	
-		// Espera 0.45 segundos para atualizar o campo de jogo
+		// Espera 0. segundos para atualizar o campo de jogo
 		usleep(600000 - (velocidade * 100000));
 	}
 }
