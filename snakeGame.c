@@ -7,7 +7,7 @@
  */
 
 
-#include <stdio.h>
+#include <stdio_ext.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <pthread.h>
@@ -128,7 +128,7 @@ void obtemNovaPosicao(int x, int y, char *direcao, int *newX, int *newY){
 	}
 }
 
-void atualizaCampo(char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA], int *tamCobra, int *score, int newX, int newY){
+void atualizaCampo(char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA], int *tamCobra, int *score, int velocidade, int newX, int newY){
 	int pontuou=0;
 	int i;
 	Ponto aux1, aux2;
@@ -155,7 +155,7 @@ void atualizaCampo(char campo[TAM_CAMPO] [TAM_CAMPO], Ponto cobra[TAM_MAX_COBRA]
 	campo[cobra[0].y][cobra[0].x] = '@';
 	
 	if(pontuou){
-		++(*score);
+		(*score) += velocidade;
 		++(*tamCobra);
 		adicionaComida(campo);
 	} else {
@@ -217,13 +217,13 @@ void terminaJogo(char campo[TAM_CAMPO] [TAM_CAMPO], int score){
 			
 			exibeCampo(campo, score);
 			
-			usleep(15000);
+			usleep(11000);
 		}
 	}
 }
 
 
-void loopJogo(){
+void loopJogo(int velocidade){
 	int score=0;
 	int newX, newY;
 	char direcao = DIREITA;;
@@ -265,15 +265,23 @@ void loopJogo(){
 			break;
 		}
 	
-		atualizaCampo(campo, cobra, &tamCobra, &score, newX, newY);
+		atualizaCampo(campo, cobra, &tamCobra, &score, velocidade, newX, newY);
 	
 		exibeCampo(campo, score);
 	
-		// Espera 0.5 segundos para atualizar o campo de jogo
-		usleep(500000);
+		// Espera 0.45 segundos para atualizar o campo de jogo
+		usleep(600000 - (velocidade * 100000));
 	}
 }
 
+void opcoes(int *velocidade){
+	do{
+		printf("\n\n\n   Velocidade\n");
+		printf("   1 - 2 - 3 - 4 - 5\n\n");
+	
+		scanf("%d", velocidade);
+	}while(*velocidade < 1 || *velocidade > 5);
+}
 
 void inicio(){
 
@@ -292,13 +300,51 @@ void inicio(){
 	sleep(2);
 }
 
+int menu(){
+	int op;
+	
+	printf("\n\n\n   1 - Novo jogo\n");
+	printf("   2 - Opcoes\n");
+	//printf("   3 - Recordes\n");
+	printf("   0 - Sair\n");
+	printf("\n   Opcao: ");
+	
+	scanf("%d", &op);
+	
+	return op;
+}
+
 int main(){
 	struct termios oldt;
+	int op, velocidade = 3;
 
 	tcgetattr( STDIN_FILENO, &oldt );
 
 	inicio();
-	loopJogo();
+
+	do{
+		printf("\e[H\e[2J");
+		
+		__fpurge(stdin);
+		op = menu();
+		
+		printf("\e[H\e[2J");
+		
+		switch(op){
+			case 1:
+				loopJogo(velocidade);
+				
+				tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
+				
+				
+				break;
+			
+			case 2:
+				opcoes(&velocidade);
+				break;
+		}
+	
+	}while(op);
 
 	tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
 
